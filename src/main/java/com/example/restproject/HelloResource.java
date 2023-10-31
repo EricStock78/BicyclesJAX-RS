@@ -20,13 +20,20 @@ public class HelloResource {
 
         List<Bicycle> bikeList = new ArrayList<Bicycle>();
         try (Connection conn = DatabaseConnection.getBicyclesDatabaseConnection()){
-            String SQL = "SELECT name, speeds from bicycles";
+            String SQL = "SELECT id, name, speeds from bicycles";
             PreparedStatement stmt = conn.prepareStatement(SQL);
             ResultSet rs = stmt.executeQuery();
             while( rs.next()) {
                 Bicycle bike = new Bicycle( rs.getString("name"), rs.getInt("speeds"));
+                String BikeShopQuery = "SELECT name from stores where Bicycle_ID = (?)";
+                PreparedStatement stmt2 = conn.prepareStatement(BikeShopQuery);
+                stmt2.setInt(1, rs.getInt("id"));
+                ResultSet rs2 = stmt2.executeQuery();
+                while( rs2.next()) {
+                    String storeName = rs2.getString("name");
+                    bike.shopList.add( new BikeShop(storeName));
+                }
                 bikeList.add(bike);
-
             }
         }
         catch( SQLException ex) {
